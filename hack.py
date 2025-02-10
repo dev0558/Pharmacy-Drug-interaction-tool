@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-# Dataset
+# Keep your existing dataset definitions here
 disease_to_medicines = {
     "Headache": ["Paracetamol", "Ibuprofen", "Aspirin"],
-    "Depression": ["Fluoxetine (Prozac)", "Sertraline", "St. John’s Wort"],
+    "Depression": ["Fluoxetine (Prozac)", "Sertraline", "St. John's Wort"],
     "Hypertension": ["Lisinopril", "Amlodipine", "Losartan"],
     "Diabetes": ["Metformin", "Insulin", "Glipizide"],
     "Allergies": ["Antihistamines", "Loratadine", "Cetirizine"],
@@ -16,14 +16,66 @@ food_interactions = {
     "Ibuprofen": {"Coffee": "May cause stomach irritation.", "Alcohol": "Increases risk of ulcers."},
     "Aspirin": {"Grapefruit": "Increases toxicity risk.", "Garlic": "Increases bleeding risk."},
     "Fluoxetine (Prozac)": {"Caffeine": "May cause nervousness and heart palpitations."},
-    "St. John’s Wort": {"Antidepressants": "Risk of serotonin syndrome.", "Birth Control": "May reduce effectiveness."},
+    "St. John's Wort": {"Antidepressants": "Risk of serotonin syndrome.", "Birth Control": "May reduce effectiveness."},
     "Lisinopril": {"Bananas": "Can cause irregular heart rhythms due to high potassium.", "Salt Substitutes": "Risk of high potassium."},
     "Metformin": {"Alcohol": "May cause lactic acidosis.", "High-Fat Meals": "May delay absorption."},
     "Insulin": {"Cinnamon": "May cause excessive blood sugar drops.", "Alcohol": "Increases hypoglycemia risk."},
     "Atorvastatin (Lipitor)": {"Grapefruit": "Can increase statin levels, leading to toxicity.", "Alcohol": "Increases liver damage risk."},
 }
 
-# Function to handle search logic
+def show_visualization():
+    vis_window = tk.Toplevel(root)
+    vis_window.title("Medicine Interactions Visualization")
+    vis_window.geometry("800x600")
+    
+    canvas = tk.Canvas(vis_window, width=800, height=600, bg='white')
+    canvas.pack(fill="both", expand=True)
+    
+    # Draw title
+    canvas.create_text(400, 40, text="Medicine and Food Interactions", 
+                      font=("Arial", 20, "bold"), fill="#2196F3")
+    
+    # Draw medicines (left side)
+    medicines = ["Paracetamol", "Ibuprofen", "Aspirin"]
+    med_y_positions = [150, 300, 450]
+    med_x = 200
+    
+    for med, y in zip(medicines, med_y_positions):
+        # Draw medicine circle
+        canvas.create_oval(med_x-50, y-50, med_x+50, y+50, 
+                         fill="#4CAF50", outline="")
+        canvas.create_text(med_x, y, text=med, fill="white", 
+                         font=("Arial", 12))
+        
+        # Draw interactions for each medicine
+        if med in food_interactions:
+            foods = list(food_interactions[med].keys())
+            for i, food in enumerate(foods):
+                food_y = y - 30 + i * 60
+                food_x = 600
+                
+                # Draw food circle
+                canvas.create_oval(food_x-40, food_y-40, food_x+40, food_y+40,
+                                 fill="#ff5722", outline="")
+                canvas.create_text(food_x, food_y, text=food, fill="white",
+                                 font=("Arial", 12))
+                
+                # Draw connection line
+                canvas.create_line(med_x+50, y, food_x-40, food_y,
+                                 fill="#ff9800", width=2)
+    
+    # Draw legend
+    legend_y = 550
+    # Medicine legend
+    canvas.create_oval(50, legend_y-10, 70, legend_y+10, fill="#4CAF50", outline="")
+    canvas.create_text(100, legend_y, text="Medicines", anchor="w")
+    # Food legend
+    canvas.create_oval(150, legend_y-10, 170, legend_y+10, fill="#ff5722", outline="")
+    canvas.create_text(200, legend_y, text="Food/Substances", anchor="w")
+    # Interaction legend
+    canvas.create_line(300, legend_y, 340, legend_y, fill="#ff9800", width=2)
+    canvas.create_text(370, legend_y, text="Interaction", anchor="w")
+
 def check_interactions():
     user_input = input_entry.get().strip()
     if not user_input:
@@ -48,7 +100,6 @@ def check_interactions():
     result_text.pack(fill="both", expand=True)
     scrollbar.config(command=result_text.yview)
 
-    # Check if input is a disease
     if user_input in disease_to_medicines:
         medicines = disease_to_medicines[user_input]
         result_text.insert(tk.END, f"Disease: {user_input}\n\n")
@@ -61,7 +112,7 @@ def check_interactions():
                     result_text.insert(tk.END, f"  - {item}: {effect}\n")
             else:
                 result_text.insert(tk.END, "  No known interactions.\n")
-    else:  # Check if input is a medicine
+    else:
         interactions = food_interactions.get(user_input, None)
         if interactions:
             result_text.insert(tk.END, f"Medicine: {user_input}\n\nInteractions:\n")
@@ -70,7 +121,7 @@ def check_interactions():
         else:
             result_text.insert(tk.END, f"No known interactions for '{user_input}'.")
 
-    result_text.config(state="disabled")  # Make text read-only
+    result_text.config(state="disabled")
 
 # Initialize main window
 root = tk.Tk()
@@ -106,9 +157,17 @@ def on_disease_select(event):
 
 disease_dropdown.bind("<<ComboboxSelected>>", on_disease_select)
 
+# Button frame
+button_frame = tk.Frame(root, bg="#e3f2fd")
+button_frame.pack(pady=10)
+
 # Search button
-search_button = tk.Button(root, text="Check Interactions", font=("Arial", 12), bg="#4CAF50", fg="#ffffff", command=check_interactions)
-search_button.pack(pady=10)
+search_button = tk.Button(button_frame, text="Check Interactions", font=("Arial", 12), bg="#4CAF50", fg="#ffffff", command=check_interactions)
+search_button.pack(side="left", padx=5)
+
+# Visualization button
+vis_button = tk.Button(button_frame, text="Show Visualization", font=("Arial", 12), bg="#2196F3", fg="#ffffff", command=show_visualization)
+vis_button.pack(side="left", padx=5)
 
 # Footer
 footer = tk.Label(root, text="Powered by Team CyberSecurity", font=("Arial", 10), bg="#e3f2fd", fg="#777777")
