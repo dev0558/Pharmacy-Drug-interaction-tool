@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-# Keep your existing dataset definitions here
+
 disease_to_medicines = {
     "Headache": ["Paracetamol", "Ibuprofen", "Aspirin"],
     "Depression": ["Fluoxetine (Prozac)", "Sertraline", "St. John's Wort"],
